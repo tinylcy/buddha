@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.tinylcy.annotation.RpcService;
 
 import javax.imageio.spi.ServiceRegistry;
@@ -46,7 +47,6 @@ public class RpcServer implements ApplicationContextAware {
         if (MapUtils.isNotEmpty(serviceMap)) {
             for (Object bean : serviceMap.values()) {
                 String interfaceName = bean.getClass().getAnnotation(RpcService.class).value().getName();
-                LOGGER.info(interfaceName);
                 handlerMap.put(interfaceName, bean);
             }
         }
@@ -62,9 +62,9 @@ public class RpcServer implements ApplicationContextAware {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
-                            channel.pipeline().addLast(new RpcEncoder());
-                            channel.pipeline().addLast(new RpcDecoder());
-                            channel.pipeline().addLast(new RpcHandler(handlerMap));
+                            channel.pipeline().addLast(new RpcEncoder(RpcResponse.class));
+                            channel.pipeline().addLast(new RpcDecoder(RpcRequest.class));
+                            channel.pipeline().addLast(new RpcServerHandler(handlerMap));
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -83,6 +83,7 @@ public class RpcServer implements ApplicationContextAware {
 
     public static void main(String[] args) {
         RpcServer server = new RpcServer(null);
+        server.setApplicationContext(new ClassPathXmlApplicationContext("applicationContext.xml"));
         server.bootstrap();
     }
 

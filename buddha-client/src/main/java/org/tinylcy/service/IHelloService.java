@@ -3,6 +3,6 @@ package org.tinylcy.service;
 /**
  * Created by chenyangli.
  */
-public interface HelloService {
+public interface IHelloService {
     String hello(String name);
 }

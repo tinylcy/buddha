@@ -1,3 +1,3 @@
 ## buddha
 
-buddha is a simple RPC framework based on netty(under development).
+buddha will be a RPC framework based on netty.

@@ -7,10 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>client</artifactId>
+    <artifactId>buddha-client</artifactId>
     <packaging>jar</packaging>
 
-    <name>client</name>
+    <name>buddha-client</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -18,6 +18,18 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.tinylcy</groupId>
+            <artifactId>buddha-transport</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tinylcy</groupId>
+            <artifactId>buddha-codec</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
 </project>

@@ -6,6 +6,7 @@ import com.esotericsoftware.kryo.io.Output;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * Created by chenyangli.
@@ -16,14 +17,26 @@ public class KryoSerializer implements Serializer {
         Kryo kryo = new Kryo();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Output output = new Output(baos);
-        kryo.writeObject(output, baos);
-        return baos.toByteArray();
+        kryo.writeObject(output, object);
+        output.flush();
+        output.close();
+        byte[] bytes = baos.toByteArray();
+        try {
+            baos.flush();
+            baos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 
     public Object deserialize(byte[] bytes, Class<?> clazz) {
         Kryo kryo = new Kryo();
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         Input input = new Input(bais);
-        return kryo.readObject(input, clazz);
+        Object result = kryo.readObject(input, clazz);
+        System.out.println(result);
+        input.close();
+        return result;
     }
 }

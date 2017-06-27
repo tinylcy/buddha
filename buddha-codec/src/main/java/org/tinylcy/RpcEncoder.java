@@ -9,6 +9,12 @@ import io.netty.handler.codec.MessageToByteEncoder;
  */
 public class RpcEncoder extends MessageToByteEncoder {
 
+    private Class<?> clazz;
+
+    public RpcEncoder(Class<?> clazz) {
+        this.clazz = clazz;
+    }
+
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Object object, ByteBuf byteBuf)
             throws Exception {

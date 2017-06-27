@@ -9,5 +9,4 @@
 
     <context:component-scan base-package="org.tinylcy"/>
 
-    <bean id="duke" class="org.tinylcy.spring.Juggler"></bean>
 </beans>

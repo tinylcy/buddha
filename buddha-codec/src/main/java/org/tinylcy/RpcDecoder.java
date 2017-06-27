@@ -29,8 +29,12 @@ public class RpcDecoder extends ByteToMessageDecoder {
             throw new RuntimeException("RpcDecoder: the count of bytes can not be < 0: " + length);
         }
         byte[] bytes = new byte[length];
+        byteBuf.readBytes(bytes);
         Object object = serializer.deserialize(bytes, clazz);
         list.add(object);
     }
 
+    public void setClass(Class<?> clazz) {
+        this.clazz = clazz;
+    }
 }

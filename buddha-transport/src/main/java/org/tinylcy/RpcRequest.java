@@ -1,5 +1,7 @@
 package org.tinylcy;
 
+import java.util.Arrays;
+
 /**
  * Created by chenyangli.
  */
@@ -10,6 +12,17 @@ public class RpcRequest {
     private Class<?>[] paramTypes;
     private Object[] params;
 
+    public RpcRequest() {
+    }
+
+    public RpcRequest(String requestId, String className, String methodName,
+                      Class<?>[] paramTypes, Object[] params) {
+        this.requestId = requestId;
+        this.className = className;
+        this.methodName = methodName;
+        this.paramTypes = paramTypes;
+        this.params = params;
+    }
 
     public String getRequestId() {
         return requestId;
@@ -49,5 +62,16 @@ public class RpcRequest {
 
     public void setParams(Object[] params) {
         this.params = params;
+    }
+
+    @Override
+    public String toString() {
+        return "RpcRequest{" +
+                "requestId='" + requestId + '\'' +
+                ", className='" + className + '\'' +
+                ", methodName='" + methodName + '\'' +
+                ", paramTypes=" + Arrays.toString(paramTypes) +
+                ", params=" + Arrays.toString(params) +
+                '}';
     }
 }
