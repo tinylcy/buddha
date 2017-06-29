@@ -15,8 +15,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.tinylcy.annotation.RpcService;
+import org.tinylcy.zookeeper.ZooKeeperManager;
 
-import javax.imageio.spi.ServiceRegistry;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,16 +28,20 @@ public class RpcServer implements ApplicationContextAware {
 
     private static final Logger LOGGER = Logger.getLogger(RpcServer.class);
 
-    private String serverAddress;
+    private String host;
+    private int port;
     private ServiceRegistry registry;
     private Map<String, Object> handlerMap = new HashMap<String, Object>();
 
-    public RpcServer(String serverAddress) {
-        this.serverAddress = serverAddress;
+    public RpcServer(String host, int port) {
+        this.host = host;
+        this.port = port;
+        registry = new ServiceRegistry(new ZooKeeperManager("127.0.0.1:2181"));
     }
 
-    public RpcServer(String serverAddress, ServiceRegistry registry) {
-        this.serverAddress = serverAddress;
+    public RpcServer(String host, int port, ServiceRegistry registry) {
+        this.host = host;
+        this.port = port;
         this.registry = registry;
     }
 
@@ -68,8 +72,13 @@ public class RpcServer implements ApplicationContextAware {
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
-            ChannelFuture future = bootstrap.bind(new InetSocketAddress(9090)).sync();
-            LOGGER.info("RpcServer start successfully, listening on port: " + 9090);
+            ChannelFuture future = bootstrap.bind(new InetSocketAddress(port)).sync();
+
+            registry.register(host, port);
+
+            System.out.println("RpcServer start successfully, listening on port: " + port);
+            LOGGER.info("RpcServer start successfully, listening on port: " + port);
+
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             LOGGER.error("RpcServer bind failure.");
@@ -82,7 +91,7 @@ public class RpcServer implements ApplicationContextAware {
     }
 
     public static void main(String[] args) {
-        RpcServer server = new RpcServer(null);
+        RpcServer server = new RpcServer("127.0.0.1", 9090);
         server.setApplicationContext(new ClassPathXmlApplicationContext("applicationContext.xml"));
         server.bootstrap();
     }

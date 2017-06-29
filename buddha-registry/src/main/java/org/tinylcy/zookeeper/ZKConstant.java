@@ -1,4 +1,4 @@
-package org.tinylcy;
+package org.tinylcy.zookeeper;
 
 /**
  * Created by chenyangli.

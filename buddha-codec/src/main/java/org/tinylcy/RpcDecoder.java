@@ -23,11 +23,12 @@ public class RpcDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list)
             throws Exception {
-        Serializer serializer = new KryoSerializer();
-        int length = byteBuf.readableBytes();
-        if (length < 0) {
-            throw new RuntimeException("RpcDecoder: the count of bytes can not be < 0: " + length);
+        if (byteBuf.readableBytes() <= 0) {
+            return;
         }
+        System.out.println("RpcDecoder - byteBuf: " + byteBuf);
+        Serializer serializer = SerializerFactory.load();
+        int length = byteBuf.readableBytes();
         byte[] bytes = new byte[length];
         byteBuf.readBytes(bytes);
         Object object = serializer.deserialize(bytes, clazz);

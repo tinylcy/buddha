@@ -1,5 +1,6 @@
 package org.tinylcy;
 
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -19,25 +20,29 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        RpcRequest request = (RpcRequest) msg;
+    protected void channelRead0(ChannelHandlerContext context, RpcRequest request)
+            throws Exception {
+        System.out.println("RpcServerHandler - request: " + request);
+
         RpcResponse response = new RpcResponse();
         response.setRequestId(request.getRequestId());
         response.setError(null);
         Object result = handle(request);
         response.setResult(result);
-        ctx.writeAndFlush(response);
+        context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcRequest request)
-            throws Exception {
-        System.out.println("RpcServer: channelRead0");
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("RpcClient channelReadComplete");
     }
 
     private Object handle(RpcRequest request) {
         String className = request.getClassName();
         Object serviceBean = handlerMap.get(className);
+        if (serviceBean == null) {
+
+        }
         Method[] methods = serviceBean.getClass().getDeclaredMethods();
         Object result = null;
         try {

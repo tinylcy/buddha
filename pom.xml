@@ -8,10 +8,11 @@
     <modules>
         <module>buddha-client</module>
         <module>buddha-server</module>
-        <module>buddha-register</module>
+        <module>buddha-registry</module>
         <module>buddha-transport</module>
         <module>buddha-codec</module>
         <module>buddha-serialization</module>
+        <module>buddha-common</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -92,6 +93,14 @@
             <artifactId>cglib</artifactId>
             <version>3.1</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+        </dependency>
+
 
     </dependencies>
 </project>

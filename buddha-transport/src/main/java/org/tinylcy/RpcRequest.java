@@ -1,34 +1,39 @@
 package org.tinylcy;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by chenyangli.
  */
-public class RpcRequest {
-    private String requestId;
+public class RpcRequest implements BasicMessage {
+
+    private static final AtomicLong REQUEST_ID = new AtomicLong(1L);
+
+    private Long requestId;
     private String className;
     private String methodName;
     private Class<?>[] paramTypes;
     private Object[] params;
 
     public RpcRequest() {
+        this.requestId = REQUEST_ID.getAndIncrement();
     }
 
-    public RpcRequest(String requestId, String className, String methodName,
+    public RpcRequest(String className, String methodName,
                       Class<?>[] paramTypes, Object[] params) {
-        this.requestId = requestId;
+        this.requestId = REQUEST_ID.getAndIncrement();
         this.className = className;
         this.methodName = methodName;
         this.paramTypes = paramTypes;
         this.params = params;
     }
 
-    public String getRequestId() {
+    public Long getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
+    public void setRequestId(Long requestId) {
         this.requestId = requestId;
     }
 

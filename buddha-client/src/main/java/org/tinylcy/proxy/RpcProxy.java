@@ -28,7 +28,7 @@ public class RpcProxy implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args)
             throws Throwable {
-        return client.send(clazz, method, args);
+        return client.call(clazz, method, args);
     }
 
 }

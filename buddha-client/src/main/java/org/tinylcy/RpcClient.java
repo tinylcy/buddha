@@ -9,9 +9,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.log4j.Logger;
+import org.tinylcy.zookeeper.ZooKeeperManager;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by chenyangli.
@@ -20,8 +22,15 @@ public class RpcClient {
 
     private static final Logger LOGGER = Logger.getLogger(RpcClient.class);
 
-    public Object send(final Class<?> clazz, Method method, Object[] args) {
-        RpcRequest request = new RpcRequest("", clazz.getName(),
+    private CountDownLatch latch = new CountDownLatch(1);
+    private ServiceDiscovery discovery;
+
+    public RpcClient() {
+        discovery = new ServiceDiscovery(new ZooKeeperManager("127.0.0.1:2181"));
+    }
+
+    public Object call(final Class<?> clazz, Method method, Object[] args) {
+        RpcRequest request = new RpcRequest(clazz.getName(),
                 method.getName(), method.getParameterTypes(), args);
         EventLoopGroup group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
@@ -33,14 +42,22 @@ public class RpcClient {
                         protected void initChannel(SocketChannel channel) throws Exception {
                             channel.pipeline().addLast(new RpcEncoder(RpcRequest.class));
                             channel.pipeline().addLast(new RpcDecoder(RpcResponse.class));
-                            channel.pipeline().addLast(new RpcClientHandler(response));
+                            channel.pipeline().addLast(new RpcClientHandler(response, latch));
                         }
                     }).option(ChannelOption.SO_KEEPALIVE, true);
-            ChannelFuture future = bootstrap.connect(new InetSocketAddress("localhost", 9090)).sync();
+
+            String connectString = discovery.discover();
+            String[] tokens = connectString.split(":");
+            String host = tokens[0];
+            int port = Integer.parseInt(tokens[1]);
+            ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port)).sync();
             future.channel().writeAndFlush(request).sync();
+
+            latch.await();
             future.channel().closeFuture().sync();
+
         } catch (InterruptedException e) {
-            LOGGER.error("RpcClient send RPC error.");
+            LOGGER.error("RpcClient call RPC failure.");
             e.printStackTrace();
         } finally {
             group.shutdownGracefully();

@@ -3,16 +3,16 @@ package org.tinylcy;
 /**
  * Created by chenyangli.
  */
-public class RpcResponse {
-    private String requestId;
+public class RpcResponse implements BasicMessage {
+    private Long requestId;
     private Throwable error;
     private Object result;
 
-    public String getRequestId() {
+    public Long getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
+    public void setRequestId(Long requestId) {
         this.requestId = requestId;
     }
 

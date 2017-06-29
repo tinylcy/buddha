@@ -1,8 +1,9 @@
-package org.tinylcy;
+package org.tinylcy.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import org.tinylcy.Serializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,13 +31,13 @@ public class KryoSerializer implements Serializer {
         return bytes;
     }
 
-    public Object deserialize(byte[] bytes, Class<?> clazz) {
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) {
         Kryo kryo = new Kryo();
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         Input input = new Input(bais);
-        Object result = kryo.readObject(input, clazz);
-        System.out.println(result);
+        T result = kryo.readObject(input, clazz);
         input.close();
         return result;
     }
+
 }
