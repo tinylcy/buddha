@@ -1,7 +1,6 @@
 package org.tinylcy;
 
 import org.apache.log4j.Logger;
-import org.tinylcy.zookeeper.ZKConstant;
 import org.tinylcy.zookeeper.ZooKeeperManager;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class ServiceDiscovery {
 
     public String discover() {
         manager.connect();
-        List<String> services = manager.listChildren(ZKConstant.ZK_REGISTRY_PATH);
+        List<String> services = manager.listChildren(ZooKeeperManager.ZK_REGISTRY_PATH);
         int size = services.size();
         int index = RandomGenerator.randInt(0, size - 1);
         String connectString = services.get(index);

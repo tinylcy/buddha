@@ -9,23 +9,25 @@
 
     <context:component-scan base-package="org.tinylcy"/>
 
-    <!--Read values from property file-->
-    <context:property-placeholder location="buddha-server.properties"/>
+    <context:property-placeholder location="buddha-client.properties"/>
 
     <!--ZooKeeper manager-->
     <bean id="zk-manager" class="org.tinylcy.zookeeper.ZooKeeperManager">
         <constructor-arg name="zkAddress" value="${zookeeper.address}"/>
     </bean>
 
-    <!--Service registration service provider-->
-    <bean id="buddha-registry" class="org.tinylcy.ServiceRegistry">
+    <!--RPC service discoverer-->
+    <bean id="buddha-discovery" class="org.tinylcy.ServiceDiscovery">
         <constructor-arg name="manager" ref="zk-manager"/>
     </bean>
 
-    <!--RPC server-->
-    <bean id="buddha-rpc-server" class="org.tinylcy.RpcServer">
-        <constructor-arg name="serverAddress" value="${server.address}"/>
-        <constructor-arg name="registry" ref="buddha-registry"/>
+    <!--RPC client-->
+    <bean id="buddha-rpc-client" class="org.tinylcy.RpcClient">
+        <constructor-arg name="discovery" ref="buddha-discovery"/>
     </bean>
 
+    <!--rpc dynamic proxy-->
+    <bean id="buddha-rpc-proxy" class="org.tinylcy.proxy.RpcProxy">
+        <constructor-arg name="client" ref="buddha-rpc-client"/>
+    </bean>
 </beans>

@@ -11,11 +11,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.tinylcy.annotation.RpcService;
-import org.tinylcy.zookeeper.ZooKeeperManager;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -24,24 +24,25 @@ import java.util.Map;
 /**
  * Created by chenyangli.
  */
-public class RpcServer implements ApplicationContextAware {
+public class RpcServer implements ApplicationContextAware, InitializingBean {
 
     private static final Logger LOGGER = Logger.getLogger(RpcServer.class);
 
-    private String host;
-    private int port;
+    /**
+     * host:port
+     */
+    private String serverAddress;
     private ServiceRegistry registry;
+
+    /**
+     * Service handler map
+     * key:     service Id        (interface name)
+     * value:   concrete handler  (Spring bean)
+     */
     private Map<String, Object> handlerMap = new HashMap<String, Object>();
 
-    public RpcServer(String host, int port) {
-        this.host = host;
-        this.port = port;
-        registry = new ServiceRegistry(new ZooKeeperManager("127.0.0.1:2181"));
-    }
-
-    public RpcServer(String host, int port, ServiceRegistry registry) {
-        this.host = host;
-        this.port = port;
+    public RpcServer(String serverAddress, ServiceRegistry registry) {
+        this.serverAddress = serverAddress;
         this.registry = registry;
     }
 
@@ -54,6 +55,11 @@ public class RpcServer implements ApplicationContextAware {
                 handlerMap.put(interfaceName, bean);
             }
         }
+    }
+
+    public void afterPropertiesSet() throws Exception {
+        registry.init();
+        bootstrap();
     }
 
     public void bootstrap() {
@@ -72,11 +78,16 @@ public class RpcServer implements ApplicationContextAware {
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
+
+            String[] tokens = serverAddress.split(":");
+            String host = tokens[0];
+            int port = Integer.parseInt(tokens[1]);
+
             ChannelFuture future = bootstrap.bind(new InetSocketAddress(port)).sync();
 
             registry.register(host, port);
 
-            System.out.println("RpcServer start successfully, listening on port: " + port);
+            System.out.println("buddha rpc server start successfully, listening on port: " + port);
             LOGGER.info("RpcServer start successfully, listening on port: " + port);
 
             future.channel().closeFuture().sync();
@@ -91,9 +102,10 @@ public class RpcServer implements ApplicationContextAware {
     }
 
     public static void main(String[] args) {
-        RpcServer server = new RpcServer("127.0.0.1", 9090);
-        server.setApplicationContext(new ClassPathXmlApplicationContext("applicationContext.xml"));
-        server.bootstrap();
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext("applicationContext.xml");
+        // RpcServer server = (RpcServer) context.getBean("buddha-rpc-server");
+        // System.out.println(server);
     }
 
 }

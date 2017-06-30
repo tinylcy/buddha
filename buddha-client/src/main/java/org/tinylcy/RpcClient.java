@@ -9,7 +9,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.log4j.Logger;
-import org.tinylcy.zookeeper.ZooKeeperManager;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -25,8 +24,8 @@ public class RpcClient {
     private CountDownLatch latch = new CountDownLatch(1);
     private ServiceDiscovery discovery;
 
-    public RpcClient() {
-        discovery = new ServiceDiscovery(new ZooKeeperManager("127.0.0.1:2181"));
+    public RpcClient(ServiceDiscovery discovery) {
+        this.discovery = discovery;
     }
 
     public Object call(final Class<?> clazz, Method method, Object[] args) {

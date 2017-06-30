@@ -17,12 +17,12 @@ public class RpcProxy implements InvocationHandler {
     private Class<?> clazz;
     private RpcClient client;
 
-    public RpcProxy(Class<?> clazz, RpcClient client) {
-        this.clazz = clazz;
+    public RpcProxy(RpcClient client) {
         this.client = client;
     }
 
-    public <T> T newProxy() {
+    public <T> T newProxy(Class<?> clazz) {
+        this.clazz = clazz;
         return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{clazz}, this);
     }
 

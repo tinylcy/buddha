@@ -3,6 +3,7 @@ package org.tinylcy.zookeeper;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.*;
+import org.tinylcy.PropertyReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,44 +16,48 @@ import java.util.concurrent.CountDownLatch;
 public class ZooKeeperManager {
 
     private static final Logger LOGGER = Logger.getLogger(ZooKeeperManager.class);
+    private static final PropertyReader READER = new PropertyReader("zookeeper.properties");
+    public static final int ZK_SESSION_TIMEOUT =
+            Integer.parseInt(READER.getProperty("ZK_SESSION_TIMEOUT"));
+    public static final String ZK_REGISTRY_PATH = READER.getProperty("ZK_REGISTRY_PATH");
 
-    private String connectString;
+    private String zkAddress;
     private ZooKeeper zk;
 
-    public ZooKeeperManager(String connectString) {
-        this.connectString = connectString;
+    public ZooKeeperManager(String zkAddress) {
+        this.zkAddress = zkAddress;
     }
 
     public void connect() {
         final CountDownLatch connectedSignal = new CountDownLatch(1);
         try {
-            zk = new ZooKeeper(connectString, ZKConstant.ZK_SESSION_TIMEOUT, new Watcher() {
+            zk = new ZooKeeper(zkAddress, ZK_SESSION_TIMEOUT, new Watcher() {
                 public void process(WatchedEvent watchedEvent) {
                     connectedSignal.countDown();
                 }
             });
             connectedSignal.await();
 
-            LOGGER.info("Successfully connected to " + connectString);
+            LOGGER.info("Successfully connected to " + zkAddress);
         } catch (IOException e) {
-            LOGGER.info("Failed to connect to " + connectString);
+            LOGGER.info("Failed to connect to " + zkAddress);
             e.printStackTrace();
         } catch (InterruptedException e) {
-            LOGGER.info("Failed to connect to " + connectString);
+            LOGGER.info("Failed to connect to " + zkAddress);
             e.printStackTrace();
         }
     }
 
     public void createNode(String nodePath) {
         try {
-            if (zk.exists(ZKConstant.ZK_REGISTRY_PATH, true) == null) {
-                zk.create(ZKConstant.ZK_REGISTRY_PATH, null,
+            if (zk.exists(ZK_REGISTRY_PATH, true) == null) {
+                zk.create(ZK_REGISTRY_PATH, null,
                         ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             }
 
-            zk.create(ZKConstant.ZK_REGISTRY_PATH + "/" + nodePath, null,
+            zk.create(ZK_REGISTRY_PATH + "/" + nodePath, null,
                     ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            LOGGER.info(nodePath + " have been created successfully.");
+            LOGGER.info("Node " + nodePath + " have been created successfully.");
             zk.close();
         } catch (InterruptedException e) {
             LOGGER.error("Creating node " + nodePath + " failed.");
@@ -96,14 +101,13 @@ public class ZooKeeperManager {
         }
     }
 
-
     private void checkGroupPath(String path) {
         if (Strings.isNullOrEmpty(path)) {
             String msg = "group path can not be null or empty: " + path;
             LOGGER.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        if (!path.startsWith(ZKConstant.ZK_REGISTRY_PATH)) {
+        if (!path.startsWith(ZK_REGISTRY_PATH)) {
             String msg = "Illegal access to group: " + path;
             LOGGER.error(msg);
             throw new IllegalArgumentException(msg);

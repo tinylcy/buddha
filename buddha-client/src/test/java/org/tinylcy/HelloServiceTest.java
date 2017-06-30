@@ -1,6 +1,8 @@
 package org.tinylcy;
 
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.tinylcy.proxy.RpcProxy;
 import org.tinylcy.service.IHelloService;
 
@@ -10,10 +12,10 @@ import org.tinylcy.service.IHelloService;
 public class HelloServiceTest {
 
     @Test
-    public void testHello() {
-        RpcClient client = new RpcClient();
-        RpcProxy proxy = new RpcProxy(IHelloService.class, client);
-        IHelloService service = proxy.newProxy();
+    public void helloTest() {
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        RpcProxy proxy = (RpcProxy) context.getBean("buddha-rpc-proxy");
+        IHelloService service = proxy.newProxy(IHelloService.class);
         String result = service.hello("chenyang");
         System.out.println(result);
     }

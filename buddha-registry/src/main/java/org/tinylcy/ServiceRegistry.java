@@ -16,10 +16,25 @@ public class ServiceRegistry {
         this.manager = manager;
     }
 
+    /**
+     * Service format -> host:port
+     *
+     * @param host
+     * @param port
+     */
     public void register(String host, int port) {
         manager.connect();
         manager.createNode(host + ":" + port);
         LOGGER.info("Register to " + host + ":" + port + " successfully");
+    }
+
+    /**
+     * Delete all the registered services before rpc server start.
+     */
+    public void init() {
+        manager.connect();
+        manager.deleteNode(ZooKeeperManager.ZK_REGISTRY_PATH);
+        LOGGER.info("Delete Node: " + ZooKeeperManager.ZK_REGISTRY_PATH);
     }
 
 }
