@@ -18,9 +18,10 @@ public class RpcEncoder extends MessageToByteEncoder {
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Object object, ByteBuf byteBuf)
             throws Exception {
-        System.out.println("RpcEncoder - object: " + object);
         Serializer serializer = SerializerFactory.load();
         byte[] bytes = serializer.serialize(object);
+        int len = bytes.length;
+        byteBuf.writeInt(len);
         byteBuf.writeBytes(bytes);
 
     }

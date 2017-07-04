@@ -74,7 +74,9 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
                         protected void initChannel(SocketChannel channel) throws Exception {
                             channel.pipeline().addLast(new RpcEncoder(RpcResponse.class));
                             channel.pipeline().addLast(new RpcDecoder(RpcRequest.class));
+                            // channel.pipeline().addLast(new RpcRequestCodec());
                             channel.pipeline().addLast(new RpcServerHandler(handlerMap));
+                            // channel.pipeline().addLast(new RpcResponseCodec());
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -104,6 +106,7 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
     public static void main(String[] args) {
         ApplicationContext context =
                 new ClassPathXmlApplicationContext("applicationContext.xml");
+
         // RpcServer server = (RpcServer) context.getBean("buddha-rpc-server");
         // System.out.println(server);
     }

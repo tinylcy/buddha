@@ -22,8 +22,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
     @Override
     protected void channelRead0(ChannelHandlerContext context, RpcRequest request)
             throws Exception {
-        System.out.println("RpcServerHandler - request: " + request);
-
+        System.out.println("RpcServerHandler request: " + request);
         RpcResponse response = new RpcResponse();
         response.setRequestId(request.getRequestId());
         response.setError(null);
@@ -34,7 +33,6 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("RpcClient channelReadComplete");
     }
 
     private Object handle(RpcRequest request) {
