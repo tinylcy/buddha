@@ -3,10 +3,14 @@ package org.tinylcy;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.tinylcy.concurrence.ServerThread;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by chenyangli.
@@ -22,41 +26,14 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
     @Override
     protected void channelRead0(ChannelHandlerContext context, RpcRequest request)
             throws Exception {
-        System.out.println("RpcServerHandler request: " + request);
-        RpcResponse response = new RpcResponse();
-        response.setRequestId(request.getRequestId());
-        response.setError(null);
-        Object result = handle(request);
-        response.setResult(result);
-        context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        executorService.execute(new ServerThread(context, request, handlerMap));
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
     }
 
-    private Object handle(RpcRequest request) {
-        String className = request.getClassName();
-        Object serviceBean = handlerMap.get(className);
-        if (serviceBean == null) {
-
-        }
-        Method[] methods = serviceBean.getClass().getDeclaredMethods();
-        Object result = null;
-        try {
-            for (Method method : methods) {
-                if (method.getName().equals(request.getMethodName())) {
-                    result = method.invoke(serviceBean, request.getParams());
-                    break;
-                }
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
