@@ -18,13 +18,13 @@
     </bean>
 
     <!--Service registration service provider-->
-    <bean id="buddha-registry" class="org.tinylcy.ServiceRegistry">
+    <bean id="buddha-registry" class="org.tinylcy.ServiceRegistry" init-method="connect" destroy-method="disconnect">
         <constructor-arg name="manager" ref="zk-manager"/>
     </bean>
 
     <!--RPC server-->
     <bean id="buddha-rpc-server" class="org.tinylcy.RpcServer">
-        <constructor-arg name="serverAddress" value="${server.address}"/>
+        <constructor-arg name="serverAddress" value="${server.port}"/>
         <constructor-arg name="registry" ref="buddha-registry"/>
     </bean>
 

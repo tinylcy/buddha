@@ -17,8 +17,9 @@ public class ZooKeeperManager {
 
     private static final Logger LOGGER = Logger.getLogger(ZooKeeperManager.class);
     private static final PropertyReader READER = new PropertyReader("zookeeper.properties");
-    public static final int ZK_SESSION_TIMEOUT =
-            Integer.parseInt(READER.getProperty("ZK_SESSION_TIMEOUT"));
+    //超时时间
+    public static final int ZK_SESSION_TIMEOUT = Integer.parseInt(READER.getProperty("ZK_SESSION_TIMEOUT"));
+    //路径
     public static final String ZK_REGISTRY_PATH = READER.getProperty("ZK_REGISTRY_PATH");
 
     private String zkAddress;
@@ -39,10 +40,7 @@ public class ZooKeeperManager {
             connectedSignal.await();
 
             LOGGER.info("Successfully connected to " + zkAddress);
-        } catch (IOException e) {
-            LOGGER.info("Failed to connect to " + zkAddress);
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             LOGGER.info("Failed to connect to " + zkAddress);
             e.printStackTrace();
         }
@@ -51,18 +49,15 @@ public class ZooKeeperManager {
     public void createNode(String nodePath) {
         try {
             if (zk.exists(ZK_REGISTRY_PATH, true) == null) {
-                zk.create(ZK_REGISTRY_PATH, null,
-                        ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                zk.create(ZK_REGISTRY_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             }
 
+            //创建子节点为临时节点，在服务下线时自动删除
             zk.create(ZK_REGISTRY_PATH + "/" + nodePath, null,
-                    ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                    ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
             LOGGER.info("Node " + nodePath + " have been created successfully.");
-            zk.close();
-        } catch (InterruptedException e) {
-            LOGGER.error("Creating node " + nodePath + " failed.");
-            e.printStackTrace();
-        } catch (KeeperException e) {
+            //zk.close();
+        } catch (InterruptedException | KeeperException e) {
             LOGGER.error("Creating node " + nodePath + " failed.");
             e.printStackTrace();
         }
@@ -73,13 +68,9 @@ public class ZooKeeperManager {
         List<String> result = new ArrayList<String>();
         try {
             List<String> children = zk.getChildren(nodePath, true);
-            for (String c : children) {
-                result.add(c);
-            }
-            zk.close();
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+            result.addAll(children);
+            //zk.close();
+        } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
         }
         return result;
@@ -93,11 +84,19 @@ public class ZooKeeperManager {
                 zk.delete(nodePath + "/" + c, -1);
             }
             zk.delete(nodePath, -1);
-            zk.close();
-        } catch (KeeperException e) {
+            //zk.close();
+        } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        }
+    }
+
+    public void close() {
+        if (zk != null) {
+            try {
+                zk.close();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

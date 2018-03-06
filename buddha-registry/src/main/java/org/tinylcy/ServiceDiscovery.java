@@ -18,14 +18,21 @@ public class ServiceDiscovery {
         this.manager = manager;
     }
 
-    public String discover() {
+    public void connect() {
         manager.connect();
+    }
+
+    public String discover() {
         List<String> services = manager.listChildren(ZooKeeperManager.ZK_REGISTRY_PATH);
         int size = services.size();
         int index = RandomGenerator.randInt(0, size - 1);
         String connectString = services.get(index);
         LOGGER.info("Select connection [" + connectString + "] as service provider.");
         return connectString;
+    }
+
+    public void disconnect() {
+        manager.close();
     }
 
 }

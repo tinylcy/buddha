@@ -17,7 +17,7 @@
     </bean>
 
     <!--RPC service discoverer-->
-    <bean id="buddha-discovery" class="org.tinylcy.ServiceDiscovery">
+    <bean id="buddha-discovery" class="org.tinylcy.ServiceDiscovery" init-method="connect" destroy-method="disconnect">
         <constructor-arg name="manager" ref="zk-manager"/>
     </bean>
 
