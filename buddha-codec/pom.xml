@@ -20,6 +20,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.tinylcy</groupId>
             <artifactId>buddha-serialization</artifactId>
             <version>1.0-SNAPSHOT</version>

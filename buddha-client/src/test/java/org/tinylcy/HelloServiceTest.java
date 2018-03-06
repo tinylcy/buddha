@@ -16,7 +16,7 @@ public class HelloServiceTest {
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
         RpcProxy proxy = (RpcProxy) context.getBean("buddha-rpc-proxy");
         IHelloService service = proxy.newProxy(IHelloService.class);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             String result = service.hello("chenyang");
             System.out.println(result);
         }

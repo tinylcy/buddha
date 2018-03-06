@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.tinylcy.annotation.RpcService;
 
+import javax.sound.sampled.Port;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,8 +47,7 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
         this.registry = registry;
     }
 
-    public void setApplicationContext(ApplicationContext applicationContext)
-            throws BeansException {
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Map<String, Object> serviceMap = applicationContext.getBeansWithAnnotation(RpcService.class);
         if (MapUtils.isNotEmpty(serviceMap)) {
             for (Object bean : serviceMap.values()) {
@@ -74,16 +74,14 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
                         protected void initChannel(SocketChannel channel) throws Exception {
                             channel.pipeline().addLast(new RpcEncoder(RpcResponse.class));
                             channel.pipeline().addLast(new RpcDecoder(RpcRequest.class));
-                            // channel.pipeline().addLast(new RpcRequestCodec());
                             channel.pipeline().addLast(new RpcServerHandler(handlerMap));
-                            // channel.pipeline().addLast(new RpcResponseCodec());
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            String[] tokens = serverAddress.split(":");
-            String host = tokens[0];
-            int port = Integer.parseInt(tokens[1]);
+            String[] token = serverAddress.split(":");
+            String host = token[0];
+            int port = Integer.parseInt(token[1]);
 
             ChannelFuture future = bootstrap.bind(new InetSocketAddress(port)).sync();
 
@@ -104,8 +102,7 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
     }
 
     public static void main(String[] args) {
-        ApplicationContext context =
-                new ClassPathXmlApplicationContext("applicationContext.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
 
         // RpcServer server = (RpcServer) context.getBean("buddha-rpc-server");
         // System.out.println(server);
